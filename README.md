@@ -1,1 +1,1 @@
-This application provides a manage system for Sea Ports and Ships.
+This application provides management for Sea Ports and Ships. Main file is gestFlota.cpp
