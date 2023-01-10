@@ -48,25 +48,25 @@ void Puertos::editaPuerto() {
 
    /* Solo procesa Buques con ID entre 1 y 10. */
    if(idPuerto >= 1 && idPuerto <= 10) {
-   /* Lee el nombre del Puerto. */
-   printf("       Nombre(entre 1 y 20 caracteres)?");
-   scanf("%[^\n]s", nombre);
-   fflush(stdin);
-   // fgets(nombre, longNpuerto, stdin);
-   //while((getchar()) != '\n') {};
-   //nombre[strcspn(nombre, "\n")] = 0; /* Elimina el caracter '\n' que deja el ENTER del usuario */
+      /* Lee el nombre del Puerto. */
+      printf("       Nombre(entre 1 y 20 caracteres)?");
+      scanf("%[^\n]s", nombre);
+      fflush(stdin);
+      // fgets(nombre, longNpuerto, stdin);
+      //while((getchar()) != '\n') {};
+      //nombre[strcspn(nombre, "\n")] = 0; /* Elimina el caracter '\n' que deja el ENTER del usuario */
 
-   /* Lee el tipo del Puerto. */
-   printf("       Tipo(Y-Yacimiento, R-Refineria, D-deposito)?");
-   tipoOpc = toupper(getchar());
+      /* Lee el tipo del Puerto. */
+      printf("       Tipo(Y-Yacimiento, R-Refineria, D-deposito)?");
+      tipoOpc = toupper(getchar());
 
-   /* Limpia la pantalla y consulta al usuario. */
-   while(resp != 'S' && resp != 'N') {
-      system("cls");
-      printf("Id....: %d\n", idPuerto);
-      printf("Nombre: %s\n", nombre);
+      /* Limpia la pantalla y consulta al usuario. */
+      while(resp != 'S' && resp != 'N') {
+         system("cls");
+         printf("Id....: %d\n", idPuerto);
+         printf("Nombre: %s\n", nombre);
 
-/*PRUEBA
+/*DEBUG
       printf("Nombre: ");
       for(int x = 0; x < longNpuerto; x++) {
          printf("%c", nombre[x]);
@@ -118,30 +118,28 @@ Id: 3,   Nombre: LA CASA DEL ORO   ,   Tipo: Refineria
         printf("%x", nombre[x]);
       }
       printf("\n");
-*/
-/*PRUEBA*/
+DEBUG*/
 
-
-      printf("Tipo..: %c", tipoOpc);
-      printf("\n\nIMPORTANTE: Esta opcion borra los datos anteriores.\n");
-      printf("Son correctos los nuevos datos(S/N)?");
-      resp = toupper(getchar());
-      fflush(stdin);
-   }
-
-   if(resp == 'S') {
-      /* Tipo de Puerto. */
-      switch(tipoOpc) {
-         case 'Y': tipo = yacimiento;
-                   break;
-         case 'R': tipo = refineria;
-                   break;
-         case 'D': tipo = deposito;
-                   break;
+         printf("Tipo..: %c", tipoOpc);
+         printf("\n\nIMPORTANTE: Esta opcion borra los datos anteriores.\n");
+         printf("Son correctos los nuevos datos(S/N)?");
+         resp = toupper(getchar());
+         fflush(stdin);
       }
 
-      /* Asigna el Puerto usando los datos leidos. */
-      lista[idPuerto-1].asignaPuerto(idPuerto, nombre, tipo);
+      if(resp == 'S') {
+         /* Tipo de Puerto. */
+         switch(tipoOpc) {
+            case 'Y': tipo = yacimiento;
+                      break;
+            case 'R': tipo = refineria;
+                      break;
+            case 'D': tipo = deposito;
+                      break;
+         }
+
+         /* Asigna el Puerto usando los datos leidos. */
+         lista[idPuerto-1].asignaPuerto(idPuerto, nombre, tipo);
 
 
 /*DEBUG - Muestra la lista de puertos.*/
@@ -166,9 +164,7 @@ Id: 3,   Nombre: LA CASA DEL ORO   ,   Tipo: Refineria
       //   printf("\n");
       //}
 /*DEBUG - Muestra la lista de puertos.*/
-
-      getchar();
-   }
+      }
    }else {
       printf("\n\nERROR: Debe introducir un ID entre 1 y 10. ENTER para regresar al menu...");
       fflush(stdin);
@@ -192,7 +188,8 @@ void Puertos::iniciaListaPuertos() {
    strcpy(nomIni, "LONXA DE CARRIL     ");
    lista[1].asignaPuerto(2, nomIni, deposito);
 
-   strcpy(nomIni, "AMUAY               ");
+   //strcpy(nomIni, "AMUAY               ");
+   strcpy(nomIni, "AMUAY");
    lista[2].asignaPuerto(3, nomIni, refineria);
 
    strcpy(nomIni, "POZO VIEJO          ");

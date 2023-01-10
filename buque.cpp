@@ -134,7 +134,11 @@ void flota::editaBuque(Puertos & listaPuertos) {
            printf("     %d-", listaPuertos.lista[k].id);
 
            for(int x = 0; x < longNpuerto; x++) {
-             printf("%c", listaPuertos.lista[k].nomP[x]);
+              if(!isalpha(listaPuertos.lista[k].nomP[x])) {
+                 printf(" ");
+              }else {
+                 printf("%c", listaPuertos.lista[k].nomP[x]);
+              }
            }
 
            printf("   Tipo: ");
@@ -206,18 +210,17 @@ void flota::editaBuque(Puertos & listaPuertos) {
       //   printf("Puerto Inicio: %d", vectorBuques[k].pIid);
       //   printf("\n");
       //}
+        //getchar();
+        //fflush(stdin);
+        //getchar();
 /*DEBUG - Muestra la lista de puertos.*/
 
-
-        getchar();
+     }
+     }else {
+        printf("\n\nERROR: Debe introducir un ID entre A y E. ENTER para regresar al menu...");
         fflush(stdin);
         getchar();
-   }
-   }else {
-      printf("\n\nERROR: Debe introducir un ID entre A y E. ENTER para regresar al menu...");
-      fflush(stdin);
-      getchar();
-   }
+     }
 }
 
 /* Procedimiento de tratamiento de la opcion "Operar Buque".
@@ -932,7 +935,7 @@ void flota::iniciaFlota() {
 
    strcpy(nomIni, "BEATRIZ UNO        ");
    vectorBuques[1].asignaBuque(B, nomIni, 10, 5, 2022, 1);
-   vectorBuques[1].oprdelBuque[0].asignaOperacion(gasolina, 2, 3, 0, 5, 0, 10, 5, 2022, 1);
+   vectorBuques[1].oprdelBuque[0].asignaOperacion(gasolina, 3, 2, 0, 5, 0, 10, 5, 2022, 1);
    vectorBuques[1].cntOper++;
 
    strcpy(nomIni, "SOUTH OIL TANKER   ");
@@ -1014,7 +1017,24 @@ void flota::estadoBuques(Puertos & listaPuertos) {
          strncpy(nomPrtAct, listaPuertos.lista[puertoAct].nomP, 19);
 
          /* Imprime registro con el estado del Buque. */
-         printf("%2c %19s %16s %02d/%02d/%4d %s\n", idBq, nombre, nomPrtAct, dia, mes, ano, nombreCarga);
+         //printf("%2c %19s %16s %02d/%02d/%4d %s\n", idBq, nombre, nomPrtAct, dia, mes, ano, nombreCarga);
+         printf("%2c ", idBq);
+         for(int i = 0; i < longNbuque-1; i++) {
+            if(!isalpha(nombre[i])) {
+               printf(" ");
+            }else {
+               printf("%c", nombre[i]);
+            }
+         }
+         printf(" ");
+         for(int i = 0; i < longNpuerto-1; i++) {
+            if(!isalpha(nomPrtAct[i])) {
+               printf(" ");
+            }else {
+               printf("%c", nomPrtAct[i]);
+            }
+         }
+         printf(" %02d/%02d/%4d %s\n", dia, mes, ano, nombreCarga);
       }
    }
 
