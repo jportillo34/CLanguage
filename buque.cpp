@@ -324,11 +324,14 @@ void flota::operaBuque(Puertos & listaPuertos) {
    nomBuq     nombre = "                   ";
    nomPrt     puertoAct = "                   ";
    nomPrt     puertoDst = "                   ";
+   nomPrt     puertoOrg = "                   ";
    nomCarga   nombreCrg = "        ";
    int        idP = 0;       /* Puerto actual del Buque. */
    int        idPd = 0;      /* Puerto destino nuevo del Buque. */
+   int        idPdR = 0;     /* Puerto destino para el reporte final. */
    int        duraCd = 0;    /* Duracion de la carga (en dias). */
    int        duraTd = 0;    /* Duracion del traslado (en dias). */
+   int        duraDd = 0;    /* Duracion de la descarga (en dias). */
    int        dia    = 0;    /* Dia de la fecha solicitada por el usuario. */
    int        mes    = 0;    /* Mes de la fecha solicitada por el usuario. */
    int        anno   = 0;    /* Anno de la fecha solicitada por el usuario. */
@@ -336,6 +339,8 @@ void flota::operaBuque(Puertos & listaPuertos) {
    fecha      fecha1 = {0, 0, 0};   /* Fecha de la Operacion mas reciente. */
    fecha      fecha2 = {1, 1, 1};   /* Fecha introducida por el usuario. */
    char       resp = ' ';
+   char       respT = ' ';
+   char       respD = ' ';
 
 
    /* Limpia la pantalla y consulta al usuario. */
@@ -374,23 +379,12 @@ void flota::operaBuque(Puertos & listaPuertos) {
      idP = vectorBuques[iBuque].oprdelBuque[ultOper].puertoI-1;      /* Lee el Puerto de Inicio. */
      idPd = vectorBuques[iBuque].oprdelBuque[ultOper].puertoD-1;     /* lee el Puerto Destino. */
      strncpy(puertoAct, listaPuertos.lista[idP].nomP, 18);           /* Lee el nombre del Puerto actual. */
+     strncpy(puertoOrg, listaPuertos.lista[idP].nomP, 18);           /* Nombre del Puerto actual para reporte. */
 
      /* Lee la fecha Fin de la ultima Operacion registrada. */
      fecha1.d = vectorBuques[iBuque].oprdelBuque[ultOper].diaF;
      fecha1.m = vectorBuques[iBuque].oprdelBuque[ultOper].mesF;
      fecha1.a = vectorBuques[iBuque].oprdelBuque[ultOper].anoF;
-
-
-/*DEBUG*/
-        //printf("ENTRA A OPERAR BUQUE");
-        //printf("\nOperacion actual:ultOper\n");
-        //printf("Carga:%d, Puerto Inicio:%d, Puerto Destino:%d, duraC:%d, duraT:%d, duraD:%d, status:%d", vectorBuques[iBuque].oprdelBuque[ultOper].carga, vectorBuques[iBuque].oprdelBuque[ultOper].puertoI, vectorBuques[iBuque].oprdelBuque[ultOper].puertoD, vectorBuques[iBuque].oprdelBuque[ultOper].duraC, vectorBuques[iBuque].oprdelBuque[ultOper].duraT, vectorBuques[iBuque].oprdelBuque[ultOper].duraD, vectorBuques[iBuque].oprdelBuque[ultOper].status);
-        //printf("\nOperacion Anterior:ultOper-1\n");
-        //printf("Carga:%d, Puerto Inicio:%d, Puerto Destino:%d, duraC:%d, duraT:%d, duraD:%d, status:%d", vectorBuques[iBuque].oprdelBuque[ultOper-1].carga, vectorBuques[iBuque].oprdelBuque[ultOper-1].puertoI, vectorBuques[iBuque].oprdelBuque[ultOper-1].puertoD, vectorBuques[iBuque].oprdelBuque[ultOper-1].duraC, vectorBuques[iBuque].oprdelBuque[ultOper-1].duraT, vectorBuques[iBuque].oprdelBuque[ultOper-1].duraD, vectorBuques[iBuque].oprdelBuque[ultOper-1].status);
-        //fflush(stdin);
-        //getchar();
-/*DEBUG*/
-
 
      /* --------------------------------- *
       * Comprueba la situacion del Buque. *
@@ -428,7 +422,7 @@ void flota::operaBuque(Puertos & listaPuertos) {
         }
 
         /* Comprueba que la fecha introducida sea valida. */
-        if(calBuque.diferenciaFechas(fecha1, fecha2) < 0) {
+        if(calBuque.diferenciaFechas(fecha1, fecha2) < 0 || dia > 31 || dia <= 0 || mes > 12 || mes <= 0 || anno <= 0) {
            printf("\n\nDebe introducir una fecha igual o posterior a la ultima Operacion del Buque. ENTER para regresar al menu...");
            fflush(stdin);
            getchar();
@@ -455,7 +449,8 @@ void flota::operaBuque(Puertos & listaPuertos) {
               if(resp == 'S') {
                  printf("Duracion de la carga en dias?");
                  fflush(stdin);
-                 duraCd = getchar() - '0';
+                 scanf("%2d", &duraCd);
+                 //duraCd = getchar() - '0';
 
                  /* Crea registro de Operacion de carga con los parametros solicitados. */
                  switch(opcCarga) {
@@ -468,10 +463,171 @@ void flota::operaBuque(Puertos & listaPuertos) {
                     case 3: tipoCg = gasolina;
                             break;
                  }
+
                  ultOper++;
                  idP++;
                  vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, 0, duraCd, 0, 0, dia, mes, anno, 0);
                  vectorBuques[iBuque].cntOper++;
+
+
+/*NUEVA VERSION PARA CUMPLIR CON EL ENUNCIADO DE LA PRACTICA*/
+                 /* Leyenda de la Carga (para mostrar al usuario en resumen final de la Operacion). */
+                 switch(tipoCg) {
+                    case crudo:    strcpy(nombreCrg, "crudo");
+                                   break;
+                    case fuel:     strcpy(nombreCrg, "fuel");
+                                   break;
+                    case gasoil:   strcpy(nombreCrg, "gasoil");
+                                   break;
+                    case gasolina: strcpy(nombreCrg , "gasolina");
+                                   break;
+                    case vacio:    strcpy(nombreCrg, "vacio");
+                                   break;
+                 }
+
+                 /* Pregunta al usuario si quiere programar el traslado. */
+                 printf("\n\nQuiere realizar el traslado (S/N)?");
+                 fflush(stdin);
+                 respT = ' ';
+                 respT = toupper(getchar());
+
+                 if(respT == 'S') {
+                    /* Lee, de nuevo, la informacion de la ultima Operacion del Buque. */
+                    ultOper = 0;
+                    ultOper = vectorBuques[iBuque].cntOper-1;
+                    tipoCg = vectorBuques[iBuque].oprdelBuque[ultOper].carga;       /* Lee el Tipo de la Carga. */
+                    statBuque = vectorBuques[iBuque].oprdelBuque[ultOper].status;   /* Lee el status de Operacion. */
+                    idP = vectorBuques[iBuque].oprdelBuque[ultOper].puertoI-1;      /* Lee el Puerto de Inicio. */
+                    idPd = vectorBuques[iBuque].oprdelBuque[ultOper].puertoD-1;     /* lee el Puerto Destino. */
+                    strncpy(puertoAct, listaPuertos.lista[idP].nomP, 18);           /* Lee el nombre del Puerto actual. */
+
+                    /* Lee la fecha Fin de la ultima Operacion registrada. */
+                    fecha1.d = vectorBuques[iBuque].oprdelBuque[ultOper].diaF;
+                    fecha1.m = vectorBuques[iBuque].oprdelBuque[ultOper].mesF;
+                    fecha1.a = vectorBuques[iBuque].oprdelBuque[ultOper].anoF;
+
+/*DEBUG*/
+//printf("\n\nUlt Op---> Carga:%d, PuertoI:%d, PuertoD:%d, Nom.Puerto:%s, FechaFin:%2d-%2d-%4d\n", tipoCg, idP, idPd, puertoAct, fecha1.d, fecha1.m, fecha1.a);
+//fflush(stdin);
+//getchar();
+/*DEBUG*/
+                    printf("\nPuertos de posible destino del buque:\n");
+
+                    /* Muestra la lista de posibles puertos destino en base al tipo de Carga. */
+                    for(int k = 0; k < numPuertos; k++) {
+                       if(listaPuertos.lista[k].id != 0) {
+                          if((listaPuertos.lista[k].id != vectorBuques[iBuque].oprdelBuque[ultOper].puertoI) &&
+                             (vectorBuques[iBuque].oprdelBuque[ultOper].carga == vacio ||
+                             (vectorBuques[iBuque].oprdelBuque[ultOper].carga == fuel && listaPuertos.lista[k].tipo == deposito) ||
+                             (vectorBuques[iBuque].oprdelBuque[ultOper].carga == gasoil && listaPuertos.lista[k].tipo == deposito) ||
+                             (vectorBuques[iBuque].oprdelBuque[ultOper].carga == gasolina && listaPuertos.lista[k].tipo == deposito) ||
+                             (vectorBuques[iBuque].oprdelBuque[ultOper].carga == crudo && listaPuertos.lista[k].tipo == refineria))) {
+
+                             printf("     %d-", listaPuertos.lista[k].id);
+
+                             for(int x = 0; x < longNpuerto; x++) {
+                                printf("%c", listaPuertos.lista[k].nomP[x]);
+                             }
+
+                             printf("   Tipo: ");
+                             switch(listaPuertos.lista[k].tipo) {
+                                case yacimiento: printf("Yacimiento");
+                                                 break;
+                                case refineria:  printf("Refineria");
+                                                 break;
+                                case deposito:   printf("Deposito");
+                                                 break;
+                                case sinAsignacion: printf("sinAsignacion");
+                                                    break;
+                             }
+                             printf("\n");
+                          }
+                       }
+                    }
+
+                    /* Solicita Puerto destino para esta Operacion. */
+                    printf("\nIdentificador del puerto destino?");
+                    fflush(stdin);
+                    idPd = getchar() - '0';
+                    idPdR = idPd;   /* Guarda el Puerto destino para el reporte final. */
+
+                    /* Solicita la duracion (en dias) de esta Operacion. */
+                    printf("Duracion del traslado en dias?");
+                    fflush(stdin);
+                    //duraTd = getchar() - '0';
+                    scanf("%2d", &duraTd);
+
+                    /* Incrementa en un dia la fecha base para la Operacion. */
+                    //calBuque.incrementaFecha(fecha1.d, fecha1.m, fecha1.a, 1);
+
+                    /* Crea registro de Operacion de traslado con los parametros solicitados. */
+                    ultOper++;
+                    idP++;
+                    vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, duraTd, 0, fecha1.d, fecha1.m, fecha1.a, 0);
+                    vectorBuques[iBuque].cntOper++;
+
+
+                    /* Pregunta al usuario si quiere programar el traslado. */
+                    printf("\n\nQuiere realizar la descarga (S/N)?");
+                    fflush(stdin);
+                    respD = ' ';
+                    respD = toupper(getchar());
+
+                    if(respD == 'S') {
+                       /* Lee, de nuevo, la informacion de la ultima Operacion del Buque. */
+                       ultOper = 0;
+                       ultOper = vectorBuques[iBuque].cntOper-1;
+                       tipoCg = vectorBuques[iBuque].oprdelBuque[ultOper].carga;       /* Lee el Tipo de la Carga. */
+                       statBuque = vectorBuques[iBuque].oprdelBuque[ultOper].status;   /* Lee el status de Operacion. */
+                       idP = vectorBuques[iBuque].oprdelBuque[ultOper].puertoI-1;      /* Lee el Puerto de Inicio. */
+                       idPd = vectorBuques[iBuque].oprdelBuque[ultOper].puertoD-1;     /* lee el Puerto Destino. */
+                       strncpy(puertoAct, listaPuertos.lista[idP].nomP, 18);           /* Lee el nombre del Puerto actual. */
+
+                       /* Lee la fecha Fin de la ultima Operacion registrada. */
+                       fecha1.d = vectorBuques[iBuque].oprdelBuque[ultOper].diaF;
+                       fecha1.m = vectorBuques[iBuque].oprdelBuque[ultOper].mesF;
+                       fecha1.a = vectorBuques[iBuque].oprdelBuque[ultOper].anoF;
+
+
+                       /* Solicita la duracion (en dias) de esta Operacion. */
+                       printf("Duracion de la descarga en dias?");
+                       fflush(stdin);
+                       //duraDd = getchar() - '0';
+                       scanf("%2d", &duraDd);
+
+                       /* Incrementa en un dia la fecha base para la Operacion. */
+                       //calBuque.incrementaFecha(fecha1.d, fecha1.m, fecha1.a, 1);
+
+                       /* Crea registro de Operacion de descarga con los parametros solicitados. */
+                       tipoCg = vacio;   /* Declara el Buque como vacio. */
+                       ultOper++;
+                       idP = idPd;
+                       idPd = 0;         /* Limpia Puerto Destino. */
+                       vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, 0, duraDd, fecha1.d, fecha1.m, fecha1.a, 0);
+                       vectorBuques[iBuque].cntOper++;
+                    }
+                 }
+
+                 printf("\n\n\nResumen de la Operacion:\n");
+                 printf("Fecha comienzo: %2d/%2d/%4d\n", dia, mes, anno);
+                 printf("Puerto origen: %s\n", puertoOrg);
+                 printf("Tipo de carga: %s\n", nombreCrg);
+                 printf("Duracion carga: %d\n", duraCd);
+
+                 if(respT == 'S') {
+                    printf("Puerto destino: ");
+                    for(int x = 0; x < longNpuerto; x++) {
+                       printf("%c", listaPuertos.lista[idPdR-1].nomP[x]);
+                    }
+                    printf("\nDuracion del traslado: %d\n", duraTd);
+                 }
+
+                 if(respD == 'S') {
+                    printf("Duracion de la descargar: %d\n", duraDd);
+                 }
+                 printf("\nPresione ENTER para regresar al menu de gestFlota...");
+                 fflush(stdin);
+                 getchar();
               }
            /* ------------------------------------------- *
             * Realiza la Operacion de Traslado del Buque. *
@@ -510,17 +666,31 @@ void flota::operaBuque(Puertos & listaPuertos) {
               printf("\nIdentificador del puerto destino?");
               fflush(stdin);
               idPd = getchar() - '0';
+              idPdR = idPd;   /* Guarda el Puerto destino para el reporte final. */
 
               /* Solicita la duracion (en dias) de esta Operacion. */
               printf("Duracion del traslado en dias?");
               fflush(stdin);
-              duraTd = getchar() - '0';
+              //duraTd = getchar() - '0';
+              scanf("%2d", &duraTd);
 
               /* Crea registro de Operacion de traslado con los parametros solicitados. */
               ultOper++;
               idP++;
               vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, duraTd, 0, dia, mes, anno, 0);
               vectorBuques[iBuque].cntOper++;
+
+              printf("\n\n\nResumen de la Operacion:\n");
+              printf("Fecha comienzo: %2d/%2d/%4d\n", dia, mes, anno);
+              printf("Puerto origen: %s\n", puertoOrg);
+              printf("Puerto destino: ");
+              for(int x = 0; x < longNpuerto; x++) {
+                 printf("%c", listaPuertos.lista[idPdR-1].nomP[x]);
+              }
+              printf("\nDuracion del traslado: %d\n", duraTd);
+              printf("\nPresione ENTER para regresar al menu de gestFlota...");
+              fflush(stdin);
+              getchar();
            }
         }
      }else if(vectorBuques[iBuque].oprdelBuque[ultOper].puertoI && !vectorBuques[iBuque].oprdelBuque[ultOper].puertoD && vectorBuques[iBuque].oprdelBuque[ultOper].carga != vacio) {
@@ -572,7 +742,7 @@ void flota::operaBuque(Puertos & listaPuertos) {
               fecha2.a = anno;
 
               /* Comprueba que la fecha introducida sea valida. */
-              if(calBuque.diferenciaFechas(fecha1, fecha2) < 0) {
+              if(calBuque.diferenciaFechas(fecha1, fecha2) < 0 || dia > 31 || dia <= 0 || mes > 12 || mes <= 0 || anno <= 0) {
                  printf("\n\nDebe introducir una fecha igual o posterior a la ultima Operacion del Buque. ENTER para regresar al menu...");
                  fflush(stdin);
                  getchar();
@@ -615,17 +785,31 @@ void flota::operaBuque(Puertos & listaPuertos) {
                  printf("\nIdentificador del puerto destino?");
                  fflush(stdin);
                  idPd = getchar() - '0';
+                 idPdR = idPd;   /* Guarda el Puerto destino para el reporte final. */
 
                  /* Solicita la duracion (en dias) de esta Operacion. */
                  printf("Duracion del traslado en dias?");
                  fflush(stdin);
-                 duraTd = getchar() - '0';
+                 //duraTd = getchar() - '0';
+                 scanf("%2d", &duraTd);
 
                  /* Crea registro de Operacion de traslado con los parametros solicitados. */
                  ultOper++;
                  idP++;
                  vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, duraTd, 0, dia, mes, anno, 0);
                  vectorBuques[iBuque].cntOper++;
+
+                 printf("\n\n\nResumen de la Operacion:\n");
+                 printf("Fecha comienzo: %2d/%2d/%4d\n", dia, mes, anno);
+                 printf("Puerto origen: %s\n", puertoOrg);
+                 printf("Puerto destino: ");
+                 for(int x = 0; x < longNpuerto; x++) {
+                    printf("%c", listaPuertos.lista[idPdR-1].nomP[x]);
+                 }
+                 printf("\nDuracion del traslado: %d\n", duraTd);
+                 printf("\nPresione ENTER para regresar al menu de gestFlota...");
+                 fflush(stdin);
+                 getchar();
               }
            }
         }else if(vectorBuques[iBuque].oprdelBuque[ultOper-1].duraT && !vectorBuques[iBuque].oprdelBuque[ultOper-1].status) {
@@ -658,13 +842,33 @@ void flota::operaBuque(Puertos & listaPuertos) {
               fecha2.m = mes;
               fecha2.a = anno;
 
-              /* Crea registro de Operacion de descarga con los parametros solicitados. */
-              tipoCg = vacio;   /* Declara el Buque como vacio. */
-              ultOper++;
-              idP++;
-              idPd = 0;         /* Limpia Puerto Destino. */
-              vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, duraTd, 0, dia, mes, anno, 0);
-              vectorBuques[iBuque].cntOper++;
+              /* Comprueba que la fecha introducida sea valida. */
+              if(calBuque.diferenciaFechas(fecha1, fecha2) < 0 || dia > 31 || dia <= 0 || mes > 12 || mes <= 0 || anno <= 0) {
+                 printf("\n\nDebe introducir una fecha igual o posterior a la ultima Operacion del Buque. ENTER para regresar al menu...");
+                 fflush(stdin);
+                 getchar();
+              }else {
+                 /* Solicita la duracion (en dias) de esta Operacion. */
+                 printf("Duracion de la descarga en dias?");
+                 fflush(stdin);
+                 //duraDd = getchar() - '0';
+                 scanf("%2d", &duraDd);
+
+                 /* Crea registro de Operacion de descarga con los parametros solicitados. */
+                 tipoCg = vacio;   /* Declara el Buque como vacio. */
+                 ultOper++;
+                 idP++;
+                 idPd = 0;         /* Limpia Puerto Destino. */
+                 vectorBuques[iBuque].oprdelBuque[ultOper].asignaOperacion(tipoCg, idP, idPd, 0, 0, duraDd, dia, mes, anno, 0);
+                 vectorBuques[iBuque].cntOper++;
+
+                 printf("\n\n\nResumen de la Operacion:\n");
+                 printf("Fecha comienzo: %2d/%2d/%4d\n", dia, mes, anno);
+                 printf("Duracion de la descargar: %d\n", duraDd);
+                 printf("\nPresione ENTER para regresar al menu de gestFlota...");
+                 fflush(stdin);
+                 getchar();
+              }
            }
         }
      }else if(vectorBuques[iBuque].oprdelBuque[ultOper].puertoI && vectorBuques[iBuque].oprdelBuque[ultOper].puertoD && vectorBuques[iBuque].oprdelBuque[ultOper].duraT) {
@@ -725,31 +929,59 @@ void flota::operaBuque(Puertos & listaPuertos) {
 
 /* Procedimiento de tratamiento de la opcion "Resumen mensual Buque". */
 void flota::resumenBuque(Puertos & listaPuertos) {
-   tipoCarga  tCarga   = vacio;
-   int        contador = 0;
-   int        duraDias = 0;
-   int        contaTra = 0;
-   int        contaCar = 0;
-   int        contaDes = 0;
-   int        indexPue = 0;
+   tipoCarga  tCarga;
+   int        contador;
+   int        duraDias;
+   int        contaTra;
+   int        contaCar;
+   int        contaDes;
+   int        indexPue;
    nomPrt     puertoInicio;
    nomPrt     puertoDestino;
    char       idBq;
-   idBuque    id = A;
+   idBuque    id;
    nomBuq     nombre = "                   ";
-   int        mes    = 0;
-   int        anno   = 0;
-   int        buscaMes;
-   int        buscaAno;
+   int        mes;
+   int        anno;
+   //int        buscaDia;
+   //int        buscaMes;
+   //int        buscaAno;
+   fecha      fecha1 = {1, 1, 1900};   /* Fecha base de cualquier calculo. */
+   fecha      fecha2 = {0, 0, 0};      /* Fecha introducida por el usuario. */
+   int        cntIni = 0;
+   int        cntFin = 0;
+   int        cntAct = 0;
+   int        x;
+
+   fecha      feCnt;                   /* Fecha contador. */
    char       resp;
    calendario calBuque;
-   int        cntCargas = 0;   /* Contador de cargas (en dias). */
-   int        cntTrasla = 0;   /* Contador de traslados (en dias). */
-   int        cntDescar = 0;   /* Contador de descargas (en dias). */
+   int        cntCargas;   /* Contador de cargas (en dias). */
+   int        cntTrasla;   /* Contador de traslados (en dias). */
+   int        cntDescar;   /* Contador de descargas (en dias). */
    vectorDias diasCalenda; /* Vector de dias de Carga, Traslado, Descarga y dias libres. */
+   int        k;
+   int        nDiasxM;
+   int        primHito = 0;
 
 
    do{
+      tCarga   = vacio;
+      contador = 0;
+      duraDias = 0;
+      contaTra = 0;
+      contaCar = 0;
+      contaDes = 0;
+      indexPue = 0;
+      id = A;
+      strcpy(nombre, "                   ");
+      mes    = 0;
+      anno   = 0;
+      cntCargas = 0;
+      cntTrasla = 0;
+      cntDescar = 0;
+      k = 0;
+
       resp = ' ';
 
       /* Limpia la pantalla y consulta al usuario. */
@@ -788,101 +1020,185 @@ void flota::resumenBuque(Puertos & listaPuertos) {
       printf("\n\nResumen Buque: %s\n\n", nombre);
 
       /* Inicializa el vector de dias del mes con la cuenta de dias. */
-      for(int i = 1; i <= 32; i++) {
+      //for(int i = 1; i <= 32; i++) {
+        for(int i = 1; i <= 31; i++) {
          diasCalenda[i].nroDia = i;
+         diasCalenda[i].cntTras = 0;
+         diasCalenda[i].tipoPeracion = ' ';
          diasCalenda[i].hito = 0;
       }
 
       /* Busca, dentro de la lista de Operaciones del Buque, todas las operaciones
          cuya fecha coincida con el mes y anno solicitados.                        */
       for(int i = 0; i < maxOperaciones; i++) {
-         buscaAno = vectorBuques[id].oprdelBuque[i].anoI;
-         buscaMes = vectorBuques[id].oprdelBuque[i].mesI;
+         /* Asigna la Fecha Inicio de Operacion al contador. */
+         feCnt.d = vectorBuques[id].oprdelBuque[i].diaI;
+         feCnt.m = vectorBuques[id].oprdelBuque[i].mesI;
+         feCnt.a = vectorBuques[id].oprdelBuque[i].anoI;
 
-         if(buscaAno == anno && buscaMes == mes) {
-            /* Es una Operacion de Carga. */
-            if(vectorBuques[id].oprdelBuque[i].duraC) {
-               /* Incrementa el contador de cargas. */
-               cntCargas = cntCargas + vectorBuques[id].oprdelBuque[i].duraC;
 
-               contador = vectorBuques[id].oprdelBuque[i].diaI;
-               duraDias = vectorBuques[id].oprdelBuque[i].duraC;
+/*DEBUG*/
+//printf("\nOPERACION%d\n", i);
 
-               contaCar++;   /* Cuenta las cargas (CX). */
+fecha2.d = 20;
+fecha2.m = 2;
+fecha2.a = 2023;
+/* Fecha inicio en dias. */
+cntIni = calBuque.diferenciaFechas(fecha1, fecha2);
 
-               for(int k = 0; k < duraDias; k++) {
-                  diasCalenda[contador].tipoPeracion = 'C';
-                  diasCalenda[contador].cntTras = contaCar;
-                  contador++;
+fecha2.d = 31;
+fecha2.m = 3;
+fecha2.a = 2023;
+/* Fecha fin en dias. */
+cntFin = calBuque.diferenciaFechas(fecha1, fecha2);
+
+fecha2.d = 20;
+fecha2.m = 2;
+fecha2.a = 2023;
+cntAct = cntIni;
+
+x = 1;
+while(cntAct != cntFin) {
+  calBuque.incrementaFecha(fecha2.d, fecha2.m, fecha2.a, 1);
+  cntAct = calBuque.diferenciaFechas(fecha1, fecha2);
+  x++;
+}
+
+printf("\nDias transcurridos: %d\n", x);
+
+//printf("\n\n\nFecha--->%2d-%2d-%4d\n", feCnt.d, feCnt.m, feCnt.a);
+//calBuque.incrementaFecha(feCnt.d, feCnt.m, feCnt.a, 1);
+//printf("\nFecha + 1 dias--->%2d-%2d-%4d\n", feCnt.d, feCnt.m, feCnt.a);
+//printf("\nanno:%4d, mes:%2d, carga:%d, PuertoI:%d, PuertoD:%d, duraC:%d, duraT:%d, duraD:%d, diaI:%2d, mesI:%2d, anoI:%4d, diaF:%2d, mesF:%2d, anoF:%4d\n", anno, mes, vectorBuques[id].oprdelBuque[i].carga, vectorBuques[id].oprdelBuque[i].puertoI, vectorBuques[id].oprdelBuque[i].puertoD, vectorBuques[id].oprdelBuque[i].duraC, vectorBuques[id].oprdelBuque[i].duraT, vectorBuques[id].oprdelBuque[i].duraD, vectorBuques[id].oprdelBuque[i].diaI, vectorBuques[id].oprdelBuque[i].mesI, vectorBuques[id].oprdelBuque[i].anoI, vectorBuques[id].oprdelBuque[i].diaF, vectorBuques[id].oprdelBuque[i].mesF, vectorBuques[id].oprdelBuque[i].anoF);
+fflush(stdin);
+getchar();
+/*DEBUG*/
+
+
+
+         k = 0;
+
+         //sumaMeses = (mesI + mesF)%12
+
+         if(anno >= vectorBuques[id].oprdelBuque[i].anoI && anno <= vectorBuques[id].oprdelBuque[i].anoF) {
+            if(mes == vectorBuques[id].oprdelBuque[i].mesI || mes == vectorBuques[id].oprdelBuque[i].mesF) {
+               if(mes == vectorBuques[id].oprdelBuque[i].mesI) {
+/*DEBUG*/
+//printf("\n\nk = feCnt.d;\n");
+/*DEBUG*/
+                  k = feCnt.d;
+               }else {
+                  feCnt.d = 1;
+                  k = 1;
+                  feCnt.m = mes;
+                  feCnt.a = anno;
+/*DEBUG*/
+//printf("\n\nk = %d, feCnt.m = %2d, feCnt.a = %4d\n", k, feCnt.m, feCnt.a);
+/*DEBUG*/
                }
-               contador = 0;
-               duraDias = 0;
-            /* Es una Operacion de Traslado. */
-            }else if(vectorBuques[id].oprdelBuque[i].duraT) {
-               /* Incrementa el contador de traslados. */
-               cntTrasla = cntTrasla + vectorBuques[id].oprdelBuque[i].duraT;
+            }
+         }
 
-               contador = vectorBuques[id].oprdelBuque[i].diaI;
-               duraDias = vectorBuques[id].oprdelBuque[i].duraT;
+         nDiasxM = 0;
+         nDiasxM = calBuque.diasxMes(feCnt.m, feCnt.a);
 
-               contaTra++;   /* Cuenta los traslados (TX). */
+         /* Es una Operacion de Carga? */
+         if(vectorBuques[id].oprdelBuque[i].duraC) {
+            contaCar++;   /* Incrementa el contador de cargas X de la Operacion individual (CX). */
 
-               /* Toma el nombre de los puertos (Inicio y Destino). */
-               indexPue = vectorBuques[id].oprdelBuque[i].puertoI-1;
-               strncpy(puertoInicio, "                   ", 20);
-               strncpy(puertoInicio, listaPuertos.lista[indexPue].nomP, 20);
-               indexPue = vectorBuques[id].oprdelBuque[i].puertoD-1;
-               strncpy(puertoDestino, "                   ", 20);
-               strncpy(puertoDestino, listaPuertos.lista[indexPue].nomP, 20);
+//printf("\nES UNA CARGA!! k:%d,  mes:%2d, mesI:%2d, mesF:%2d, diaF:%2d\n", k, mes, vectorBuques[id].oprdelBuque[i].mesI, vectorBuques[id].oprdelBuque[i].mesF, vectorBuques[id].oprdelBuque[i].diaF);
+//fflush(stdin);
+//getchar();
 
-               /* Monta los datos basicos para imprimir el Calendario. */
-               for(int k = 0; k < duraDias; k++) {
-                  diasCalenda[contador].tipoPeracion = 'T';
-                  diasCalenda[contador].cntTras = contaTra;
-                  strncpy(diasCalenda[contador].prtIni, "                   ", 20);
-                  strcpy(diasCalenda[contador].prtIni, puertoInicio);
-                  strncpy(diasCalenda[contador].prtDst, "                   ", 20);
-                  strcpy(diasCalenda[contador].prtDst, puertoDestino);
-                  tCarga = vectorBuques[id].oprdelBuque[i].carga;
+            //while(k != vectorBuques[id].oprdelBuque[i].diaF && k <= nDiasxM) {
+            while((feCnt.m == vectorBuques[id].oprdelBuque[i].mesI && feCnt.m == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (feCnt.m == vectorBuques[id].oprdelBuque[i].mesI && feCnt.m != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM) ||
+                  (feCnt.m != vectorBuques[id].oprdelBuque[i].mesI && feCnt.m == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (feCnt.m != vectorBuques[id].oprdelBuque[i].mesI && feCnt.m != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM)) {
+               /* Esta la fecha Inicio de Operacion dentro del calendario solicitado? */
+               if(feCnt.a == anno && feCnt.m == mes && feCnt.d == diasCalenda[k].nroDia) {
+                  /* Incrementa el contador de cargas general para la estadistica. */
+                  cntCargas = cntCargas + 1;
+                  diasCalenda[k].tipoPeracion = 'C';
+                  diasCalenda[k].cntTras = contaCar;
+               }
+               /* Incrementa en 1 dia el contador. */
+               calBuque.incrementaFecha(feCnt.d, feCnt.m, feCnt.a, 1);
+               k++;
+            }
+         /* Es una Operacion de Traslado? */
+         }else if(vectorBuques[id].oprdelBuque[i].duraT) {
+            contaTra++;   /* Incrementa el contador de traslados X de la Operacion individual (TX). */
 
+            /* Toma el nombre de los puertos (Inicio y Destino). */
+            indexPue = vectorBuques[id].oprdelBuque[i].puertoI-1;
+            strncpy(puertoInicio, "                   ", 20);
+            strncpy(puertoInicio, listaPuertos.lista[indexPue].nomP, 20);
+            indexPue = vectorBuques[id].oprdelBuque[i].puertoD-1;
+            strncpy(puertoDestino, "                   ", 20);
+            strncpy(puertoDestino, listaPuertos.lista[indexPue].nomP, 20);
+            tCarga = vectorBuques[id].oprdelBuque[i].carga;
+
+            primHito = 1;   /* Asegura el hito de primera ocurrencia de Operacion. */
+
+            //while(k != vectorBuques[id].oprdelBuque[i].diaF && k <= nDiasxM) {
+            while((mes == vectorBuques[id].oprdelBuque[i].mesI && mes == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (mes == vectorBuques[id].oprdelBuque[i].mesI && mes != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM) ||
+                  (mes != vectorBuques[id].oprdelBuque[i].mesI && mes == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (mes != vectorBuques[id].oprdelBuque[i].mesI && mes != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM)) {
+               /* Esta la fecha Inicio de Operacion dentro del calendario solicitado? */
+               if(feCnt.a == anno && feCnt.m == mes && feCnt.d == diasCalenda[k].nroDia) {
+                  /* Incrementa el contador de traslados general para la estadistica. */
+                  cntTrasla = cntTrasla + 1;
+
+                  diasCalenda[k].tipoPeracion = 'T';
+                  diasCalenda[k].cntTras = contaTra;
+                  strncpy(diasCalenda[k].prtIni, "                   ", 20);
+                  strcpy(diasCalenda[k].prtIni, puertoInicio);
+                  strncpy(diasCalenda[k].prtDst, "                   ", 20);
+                  strcpy(diasCalenda[k].prtDst, puertoDestino);
                   switch(tCarga) {
-                     case crudo:     strcpy(diasCalenda[contador].nCarga, "crudo");
-                                     break;
-                      case fuel:     strcpy(diasCalenda[contador].nCarga, "fuel");
-                                     break;
-                      case gasoil:   strcpy(diasCalenda[contador].nCarga, "gasoil");
-                                     break;
-                      case gasolina: strcpy(diasCalenda[contador].nCarga, "gasolina");
-                                     break;
-                      case vacio:    strcpy(diasCalenda[contador].nCarga, "vacio");
-                                     break;
+                     case crudo:    strcpy(diasCalenda[k].nCarga, "crudo");
+                                    break;
+                     case fuel:     strcpy(diasCalenda[k].nCarga, "fuel");
+                                    break;
+                     case gasoil:   strcpy(diasCalenda[k].nCarga, "gasoil");
+                                    break;
+                     case gasolina: strcpy(diasCalenda[k].nCarga, "gasolina");
+                                    break;
+                     case vacio:    strcpy(diasCalenda[k].nCarga, "vacio");
+                                    break;
                   }
 
-                  if(!k) {
-                     diasCalenda[contador].hito = 1;   /* Indica que empieza una Operacion de Traslado. */
+                  if(primHito == 1) {
+                     diasCalenda[k].hito = 1;   /* Indica que empieza una Operacion. */
+                     primHito = 0;
                   }
-
-                  contador++;
                }
-               contador = 0;
-               duraDias = 0;
-            /* Es una Operacion de Descarga. */
-            }else if(vectorBuques[id].oprdelBuque[i].duraD) {
-               /* Incrementa el contador de descargas. */
-               cntDescar = cntDescar + vectorBuques[id].oprdelBuque[i].duraD;
+               /* Incrementa en 1 dia el contador. */
+               calBuque.incrementaFecha(feCnt.d, feCnt.m, feCnt.a, 1);
+               k++;
+            }
+         /* Es una Operacion de Descarga? */
+         }else if(vectorBuques[id].oprdelBuque[i].duraD) {
+            contaDes++;   /* Incrementa el contador de descargas X de la Operacion individual (DX). */
 
-               contador = vectorBuques[id].oprdelBuque[i].diaI;
-               duraDias = vectorBuques[id].oprdelBuque[i].duraD;
+            //while(k != vectorBuques[id].oprdelBuque[i].diaF && k <= nDiasxM) {
+            while((mes == vectorBuques[id].oprdelBuque[i].mesI && mes == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (mes == vectorBuques[id].oprdelBuque[i].mesI && mes != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM) ||
+                  (mes != vectorBuques[id].oprdelBuque[i].mesI && mes == vectorBuques[id].oprdelBuque[i].mesF && k < vectorBuques[id].oprdelBuque[i].diaF) ||
+                  (mes != vectorBuques[id].oprdelBuque[i].mesI && mes != vectorBuques[id].oprdelBuque[i].mesF && k <= nDiasxM)) {
+               /* Esta la fecha Inicio de Operacion dentro del calendario solicitado? */
+               if(feCnt.a == anno && feCnt.m == mes && feCnt.d == diasCalenda[k].nroDia) {
+                  /* Incrementa el contador de descargas general para la estadistica. */
+                  cntDescar = cntDescar + 1;
 
-               contaDes++;   /* Cuenta las descargas (DX). */
-
-               for(int k = 0; k < duraDias; k++) {
-                  diasCalenda[contador].tipoPeracion = 'D';
-                  diasCalenda[contador].cntTras = contaDes;
-                  contador++;
+                  diasCalenda[k].tipoPeracion = 'D';
+                  diasCalenda[k].cntTras = contaDes;
                }
-               contador = 0;
-               duraDias = 0;
+               /* Incrementa en 1 dia el contador. */
+               calBuque.incrementaFecha(feCnt.d, feCnt.m, feCnt.a, 1);
+               k++;
             }
          }
       }
@@ -935,15 +1251,19 @@ void flota::iniciaFlota() {
 
    strcpy(nomIni, "BEATRIZ UNO        ");
    vectorBuques[1].asignaBuque(B, nomIni, 10, 5, 2022, 1);
-   vectorBuques[1].oprdelBuque[0].asignaOperacion(gasolina, 3, 2, 0, 5, 0, 10, 5, 2022, 1);
+   vectorBuques[1].oprdelBuque[0].asignaOperacion(gasolina, 3, 2, 0, 5, 0, 10, 5, 2022, 0);
    vectorBuques[1].cntOper++;
 
    strcpy(nomIni, "SOUTH OIL TANKER   ");
    vectorBuques[2].asignaBuque(C, nomIni, 2, 11, 2022, 1);
-   vectorBuques[2].oprdelBuque[0].asignaOperacion(gasolina, 1, 0, 1, 0, 0, 26, 12, 2022, 0);
+   vectorBuques[2].oprdelBuque[0].asignaOperacion(fuel, 1, 0, 0, 0, 2, 5, 2, 2023, 0);
    vectorBuques[2].cntOper++;
-   vectorBuques[2].oprdelBuque[1].asignaOperacion(gasolina, 1, 2, 0, 1, 0, 27, 12, 2022, 0);
+   vectorBuques[2].oprdelBuque[1].asignaOperacion(vacio, 1, 0, 0, 0, 0, 7, 2, 2023, 0);
    vectorBuques[2].cntOper++;
+   //vectorBuques[2].oprdelBuque[2].asignaOperacion(gasolina, 1, 0, 12, 0, 0, 26, 12, 2022, 0);
+   //vectorBuques[2].cntOper++;
+   //vectorBuques[2].oprdelBuque[3].asignaOperacion(gasolina, 1, 2, 0, 3, 0, 10, 1, 2023, 0);
+   //vectorBuques[2].cntOper++;
 }
 
 /* Procedimiento de tratamiento de la opcion "Estado Buque". */

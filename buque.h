@@ -68,7 +68,7 @@ typedef struct operacion {
                   El estado de un Buque (si esta en puerto o en traslado; si ha llegado al puerto destino;
                   si esta cargado o vacio, todo esto se establece cuando el usuario elige la opcion "Operar buque". */
 /* Numero maximo de operaciones por Buque. */
-const int maxOperaciones = 80;
+const int maxOperaciones = 8;
 typedef operacion operaciones[maxOperaciones];
 
 /* Id del Buque. */

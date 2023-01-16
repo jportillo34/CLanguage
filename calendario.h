@@ -16,6 +16,7 @@ typedef struct fecha {
 
 const int diasMes[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+typedef int vtrDias[12];
 
 /* ====================== TAD DIA ======================= */
 /* Nombre de un Puerto. */
@@ -29,7 +30,7 @@ typedef char cargaNom[longCarga];
 /* Representa un dia cualquiera dentro del Calendario del Buque. */
 typedef struct regDia {
    int       nroDia;         /* Numero de dia en el mes. */
-   int       cntTras;        /* Conteo de traslados (TX). */
+   int       cntTras;        /* Conteo de Operaciones (CX, TX, DX). */
    char      tipoPeracion;   /* Tipo de Operacion del dia: CX, TX o DX. */
    puertoNom prtIni;         /* Nombre del Puerto de Inicio de un Traslado. */
    puertoNom prtDst;         /* Nombre del Puerto destino de un Traslado. */
@@ -39,13 +40,14 @@ typedef struct regDia {
 /* ====================== TAD DIA ======================= */
 
 
+
+/* ====================== TAD CALENDARIO ======================= */
 /* Vector de los dias del mes a imprimir. */
 const int dsM = 32;
 typedef regDia vectorDias[dsM];
 
-
-/* ====================== TAD CALENDARIO ======================= */
 typedef struct calendario {
+   int diasxMes(int mes, int anno);
 /* --------------------------------------------------------------------------------- *
  * Genera e imprime el calendario mensual de un Buque para un mes y anno especifico. *
  *                                                                                   *

@@ -17,16 +17,19 @@ bool esBiciesto(int anno)
    return(anno%4 == 0);
 }
 
-/* Dada una fecha (dd-mm-aaaa), aplica un incremento (en dias). */
+/* Dada una fecha (dd-mm-aaaa), aplica un incremento. */
 void calendario::incrementaFecha(int &dia, int &mes, int &anno, int incremento) {
+   vtrDias diasXmes = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+
    for(int i = 0; i < incremento; i++) {
       dia++;
 
-      if (dia > diasMes[mes-1] || (mes == 2 && dia == 29 && !esBiciesto(anno))) {
+      if(dia > diasXmes[mes-1] || (mes == 2 && dia == 29 && !esBiciesto(anno))) {
          dia = 1;
          mes++;
 
-         if (mes == 13) {
+         if(mes == 13) {
             mes = 1;
             anno++;
          }
@@ -142,7 +145,7 @@ int diaSemana(int dia, int mes, int anno) {
 }
 
 /* Determina el numero de dias para un mes y anno especificos. */
-int diasxMes(int mes, int anno) {
+int calendario::diasxMes(int mes, int anno) {
 	if(mes == 1) {
 		return 31;
 	}
@@ -213,8 +216,8 @@ int diasxMes(int mes, int anno) {
  * ----------------------------------------------------------------------------------*/
 void calendario::imprimeCalendario(int mes, int anno, vectorDias pdiasCalendas, int tiempoC, int tiempoT, int tiempoD) {
    int cntDia = 1;   /* Contador de dias. */
-   int diaS;         /* Dia de la semana. */
-   int numDias;      /* Numero de dias en el mes. */
+   int diaS = 0;     /* Dia de la semana. */
+   int numDias = 0;  /* Numero de dias en el mes. */
    int tiempoL = 0;  /* Total (en dias) de parada o dias libres. */
 
 
