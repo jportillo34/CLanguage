@@ -1,10 +1,4 @@
-/************************************
-* NOMBRE: #Jose Rafael#
-* PRIMER APELLIDO: #Portillo#
-* SEGUNDO APELLIDO: #Lugo#
-* DNI: #Y7489057H#
-* EMAIL: #jportillo89@alumno.uned.es#
-*************************************/
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
